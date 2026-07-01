@@ -9,6 +9,72 @@
 </head>
 <body>
 
+
+<div id="passwordScreen" style="
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:#0f172a;
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:99999;
+font-family:Arial,sans-serif;
+">
+
+<div style="
+background:#1e293b;
+padding:40px;
+border-radius:16px;
+box-shadow:0 0 30px rgba(0,0,0,.5);
+width:360px;
+text-align:center;
+color:white;
+">
+
+<h2 style="margin-bottom:20px;">🔒 BBGF Secure Access</h2>
+
+<input
+type="password"
+id="pagePassword"
+placeholder="Enter Password"
+style="
+width:100%;
+padding:14px;
+border:none;
+border-radius:10px;
+margin-bottom:15px;
+font-size:16px;
+outline:none;
+"
+/>
+
+<button
+onclick="checkPassword()"
+style="
+width:100%;
+padding:14px;
+background:#22c55e;
+border:none;
+border-radius:10px;
+color:white;
+font-size:16px;
+cursor:pointer;
+font-weight:bold;
+">
+Login
+</button>
+
+<p id="passwordError" style="color:#ff6b6b;margin-top:15px;"></p>
+
+</div>
+
+</div>
+
+
+
   <!-- ===================== NAVBAR ===================== -->
   <nav class="navbar">
     <div class="nav-brand">
@@ -174,6 +240,20 @@
     </section>
 
   </main>
+
+  <!-- Password Screen -->
+...
+
+<div id="websiteContent">
+
+    <!-- ALL YOUR EXISTING PAGE CONTENT -->
+    <nav>...</nav>
+    <main>...</main>
+    <!-- All modals -->
+    <!-- Toast -->
+    <script src="app.js"></script>
+
+</div>
 
   <!-- ===================== MODALS ===================== -->
 
@@ -375,6 +455,33 @@
       </div>
     </div>
   </div>
+
+
+<div id="websiteContent" style="display:none;"></div>
+  </div>
+
+<script>
+const PASSWORD = "@Bison1111";
+
+function checkPassword() {
+    const entered = document.getElementById("pagePassword").value;
+
+    if (entered === PASSWORD) {
+        document.getElementById("passwordScreen").style.display = "none";
+        document.getElementById("websiteContent").style.display = "block";
+    } else {
+        document.getElementById("passwordError").innerText = "Incorrect Password!";
+    }
+}
+
+document
+.getElementById("pagePassword")
+.addEventListener("keypress", function(e){
+    if(e.key==="Enter"){
+        checkPassword();
+    }
+});
+</script>
 
   <!-- Modal: Edit Cashflow -->
   <div class="modal-overlay" id="modal-edit-cashflow">
