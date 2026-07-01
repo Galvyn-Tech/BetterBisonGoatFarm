@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BBGF — Goat Farm Management</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- ===================== NAVBAR ===================== -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="brand-icon">🐐</span>
+      <span class="brand-name">BBGF</span>
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-tab="investors">INVESTORS</button>
+      <button class="nav-tab" data-tab="cashflow">CASHFLOW</button>
+      <button class="nav-tab" data-tab="herd">HERD</button>
+    </div>
+    <div class="nav-status">
+      <span class="status-dot"></span>
+      <span class="status-text">Live</span>
+    </div>
+  </nav>
+
+  <!-- ===================== MAIN CONTENT ===================== -->
+  <main class="main-content">
+
+    <!-- ===== TAB 1: INVESTORS ===== -->
+    <section id="tab-investors" class="tab-section active">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Investor Portfolio</h2>
+          <p class="section-subtitle">Live equity distribution across all partners</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modal-add-investment')">+ Add Investment</button>
+      </div>
+
+      <div class="stats-row" id="investors-stats">
+        <div class="stat-card">
+          <span class="stat-label">Total Capital</span>
+          <span class="stat-value" id="stat-total-capital">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Partners</span>
+          <span class="stat-value" id="stat-total-investors">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Last Investment</span>
+          <span class="stat-value" id="stat-last-investment">—</span>
+        </div>
+      </div>
+
+      <div class="investor-grid" id="investor-cards">
+        <div class="loading-state">Loading investors…</div>
+      </div>
+
+      <div class="section-subheader">
+        <h3 class="subsection-title">Investment Ledger</h3>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Investor</th>
+              <th>Amount</th>
+              <th style="width:120px">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="ledger-tbody">
+            <tr><td colspan="4" class="loading-cell">Loading ledger…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== TAB 2: CASHFLOW ===== -->
+    <section id="tab-cashflow" class="tab-section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Cashflow Tracker</h2>
+          <p class="section-subtitle">Farm income, expenses and savings</p>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-danger"    onclick="openModal('modal-add-expense')">− Add Expense</button>
+          <button class="btn btn-primary"   onclick="openModal('modal-add-profit')">+ Add Profit</button>
+          <button class="btn btn-secondary" onclick="openModal('modal-add-saving')">◎ Add Saving</button>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-label">Total Profit</span>
+          <span class="stat-value emerald" id="stat-total-profit">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Total Expenses</span>
+          <span class="stat-value red" id="stat-total-expenses">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Net Balance</span>
+          <span class="stat-value" id="stat-net-balance">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Total Savings</span>
+          <span class="stat-value" id="stat-total-savings">—</span>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Category</th>
+              <th>Amount</th>
+              <th>Description</th>
+              <th style="width:120px">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="cashflow-tbody">
+            <tr><td colspan="6" class="loading-cell">Loading cashflow data…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== TAB 3: HERD ===== -->
+    <section id="tab-herd" class="tab-section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Herd Management</h2>
+          <p class="section-subtitle">Active goat inventory and health records</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modal-register-goat')">+ Register New Goat</button>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-label">Total Goats</span>
+          <span class="stat-value" id="stat-total-goats">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Male</span>
+          <span class="stat-value" id="stat-male-goats">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Female</span>
+          <span class="stat-value emerald" id="stat-female-goats">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Active</span>
+          <span class="stat-value emerald" id="stat-active-goats">—</span>
+        </div>
+      </div>
+
+      <div class="herd-filters">
+        <button class="filter-btn active" data-filter="ALL">All</button>
+        <button class="filter-btn" data-filter="MALE">Male</button>
+        <button class="filter-btn" data-filter="FEMALE">Female</button>
+        <button class="filter-btn" data-filter="ACTIVE">Active</button>
+        <button class="filter-btn" data-filter="SOLD">Sold</button>
+        <button class="filter-btn" data-filter="DECEASED">Deceased</button>
+      </div>
+
+      <div class="goat-grid" id="goat-grid">
+        <div class="loading-state">Loading herd data…</div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================== MODALS ===================== -->
+
+  <!-- Modal: Add Investment -->
+  <div class="modal-overlay" id="modal-add-investment">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Add Investment</h3>
+        <button class="modal-close" onclick="closeModal('modal-add-investment')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-add-investment" onsubmit="return false;">
+          <div class="form-group">
+            <label>Investor</label>
+            <select id="inv-investor-id" required>
+              <option value="">Select investor…</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Amount (?)</label>
+            <input type="number" id="inv-amount" placeholder="Enter amount" min="1" step="any" required />
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="inv-date" required />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-add-investment')">Cancel</button>
+        <button class="btn btn-primary" id="btn-submit-investment" onclick="submitAddInvestment()">Confirm Investment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add Expense -->
+  <div class="modal-overlay" id="modal-add-expense">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Log Expense</h3>
+        <button class="modal-close" onclick="closeModal('modal-add-expense')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-add-expense" onsubmit="return false;">
+          <div class="form-group">
+            <label>Category</label>
+            <input type="text" id="exp-category" placeholder="e.g., Feed, Medicine, Labor" required />
+          </div>
+          <div class="form-group">
+            <label>Amount (?)</label>
+            <input type="number" id="exp-amount" placeholder="Enter amount" min="1" step="any" required />
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea id="exp-description" placeholder="Brief description…" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="exp-date" required />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-add-expense')">Cancel</button>
+        <button class="btn btn-danger" id="btn-submit-expense" onclick="submitAddCashflow('EXPENSE')">Log Expense</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add Profit -->
+  <div class="modal-overlay" id="modal-add-profit">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Log Profit</h3>
+        <button class="modal-close" onclick="closeModal('modal-add-profit')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-add-profit" onsubmit="return false;">
+          <div class="form-group">
+            <label>Category</label>
+            <input type="text" id="prf-category" placeholder="e.g., Goat Sale, Milk, Wool" required />
+          </div>
+          <div class="form-group">
+            <label>Amount (?)</label>
+            <input type="number" id="prf-amount" placeholder="Enter amount" min="1" step="any" required />
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea id="prf-description" placeholder="Brief description…" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="prf-date" required />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-add-profit')">Cancel</button>
+        <button class="btn btn-primary" id="btn-submit-profit" onclick="submitAddCashflow('PROFIT')">Log Profit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add Saving -->
+  <div class="modal-overlay" id="modal-add-saving">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Log Saving</h3>
+        <button class="modal-close" onclick="closeModal('modal-add-saving')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-add-saving" onsubmit="return false;">
+          <div class="form-group">
+            <label>Category</label>
+            <input type="text" id="sav-category" placeholder="e.g., Reserve Fund" required />
+          </div>
+          <div class="form-group">
+            <label>Amount (?)</label>
+            <input type="number" id="sav-amount" placeholder="Enter amount" min="1" step="any" required />
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea id="sav-description" placeholder="Brief description…" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="sav-date" required />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-add-saving')">Cancel</button>
+        <button class="btn btn-secondary" id="btn-submit-saving" onclick="submitAddCashflow('SAVING')">Log Saving</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Register Goat -->
+  <div class="modal-overlay" id="modal-register-goat">
+    <div class="modal modal-wide">
+      <div class="modal-header">
+        <h3>Register New Goat</h3>
+        <button class="modal-close" onclick="closeModal('modal-register-goat')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-register-goat" onsubmit="return false;">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Tag Number</label>
+              <input type="text" id="goat-tag" placeholder="e.g., G-001" required />
+            </div>
+            <div class="form-group">
+              <label>Breed</label>
+              <input type="text" id="goat-breed" placeholder="e.g., Beetal, Teddy" required />
+            </div>
+            <div class="form-group">
+              <label>Gender</label>
+              <select id="goat-gender" required>
+                <option value="">Select gender…</option>
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Birth Date</label>
+              <input type="date" id="goat-birthdate" required />
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select id="goat-status" required>
+                <option value="ACTIVE">Active</option>
+                <option value="SOLD">Sold</option>
+                <option value="DECEASED">Deceased</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Photo URL <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+              <input type="url" id="goat-photo" placeholder="https://…" />
+            </div>
+            <div class="form-group">
+              <label>Mother (Dam)</label>
+              <select id="goat-mother">
+                <option value="">None / Unknown</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Father (Sire)</label>
+              <select id="goat-father">
+                <option value="">None / Unknown</option>
+              </select>
+            </div>
+          </div>
+          <input type="hidden" id="goat-id-edit" value="" />
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-register-goat')">Cancel</button>
+        <button class="btn btn-primary" id="btn-submit-goat" onclick="submitRegisterGoat()">Register Goat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Edit Cashflow -->
+  <div class="modal-overlay" id="modal-edit-cashflow">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Edit Record</h3>
+        <button class="modal-close" onclick="closeModal('modal-edit-cashflow')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-edit-cashflow" onsubmit="return false;">
+          <input type="hidden" id="edit-cf-id" />
+          <div class="form-group">
+            <label>Type</label>
+            <select id="edit-cf-type" required>
+              <option value="PROFIT">Profit</option>
+              <option value="EXPENSE">Expense</option>
+              <option value="SAVING">Saving</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <input type="text" id="edit-cf-category" required />
+          </div>
+          <div class="form-group">
+            <label>Amount (?)</label>
+            <input type="number" id="edit-cf-amount" min="1" step="any" required />
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea id="edit-cf-description" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="edit-cf-date" required />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-edit-cashflow')">Cancel</button>
+        <button class="btn btn-primary" id="btn-submit-edit-cashflow" onclick="submitEditCashflow()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
